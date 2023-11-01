@@ -1,48 +1,78 @@
 <script lang="ts">
-  import { apiKeyStorage, globalStorage, lastChatId, getChat, started, setGlobalSettingValueByKey, checkStateChange } from './Storage.svelte'
-  import Footer from './Footer.svelte'
-  import { replace } from 'svelte-spa-router'
-  import { afterUpdate, onMount } from 'svelte'
-  import { getPetalsBase, getPetalsWebsocket } from './ApiUtil.svelte'
-  import { set as setOpenAI } from './providers/openai/util.svelte'
-  import { hasActiveModels } from './Models.svelte'
+  import { apiKeyStorage, globalStorage, lastChatId, getChat, started, setGlobalSettingValueByKey, checkStateChange } from './Storage.svelte';
+  import Footer from './Footer.svelte';
+  import { replace } from 'svelte-spa-router';
+  import { afterUpdate, onMount } from 'svelte';
+  import { getPetalsBase, getPetalsWebsocket } from './ApiUtil.svelte';
+  import { set as setOpenAI } from './providers/openai/util.svelte';
+  import { hasActiveModels } from './Models.svelte';
+  import { get } from 'svelte/store';
 
-$: apiKey = $apiKeyStorage
+  function generateUserId() {
+  const verbs = ['Fliegender', 'Laufender', 'Springender', 'Schwimmender', 'Fahrender', 'Kriechender', 'Tanzender', 'Singender', 'Lesender', 'Schreibender', 'Malender', 'Kochender', 'Spielender', 'Trainierender', 'Jagender', 'Angelnder', 'Bauender', 'Reparierender', 'Züchtender', 'Sägender'];
+  const nouns = ['Baum', 'Stern', 'Himmel', 'Fluss', 'Berg', 'Wolke', 'Auto', 'Boot', 'Buch', 'Haus', 'Turm', 'Stuhl', 'Tisch', 'Schuh', 'Ball', 'Stift', 'Hut', 'Tasse', 'Uhr', 'Lampe'];
+  
+  const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
+  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
 
-let showPetalsSettings = $globalStorage.enablePetals
-let pedalsEndpoint = $globalStorage.pedalsEndpoint
-let hasModels = hasActiveModels()
+  // Identifikator für das Endgerät hinzufügen
+  let deviceIdentifier = 'Unbekanntes Gerät';
 
-onMount(() => {
-    if (!$started) {
-      $started = true
-      // console.log('started', apiKey, $lastChatId, getChat($lastChatId))
-      if (hasActiveModels() && getChat($lastChatId)) {
-        const chatId = $lastChatId
-        $lastChatId = 0
-        replace(`/chat/${chatId}`)
-      }
-    }
-    $lastChatId = 0
-})
+  if (navigator.userAgent.indexOf("Win") != -1) deviceIdentifier = "Windows";
+  if (navigator.userAgent.indexOf("Mac") != -1) deviceIdentifier = "MacOS";
+  if (navigator.userAgent.indexOf("Linux") != -1) deviceIdentifier = "Linux";
+  if (navigator.userAgent.indexOf("Android") != -1) deviceIdentifier = "Android";
+  if (navigator.userAgent.indexOf("like Mac") != -1) deviceIdentifier = "iOS";
 
-afterUpdate(() => {
-    hasModels = hasActiveModels()
-    pedalsEndpoint = $globalStorage.pedalsEndpoint
-    $checkStateChange++
-})
 
-const setPetalsEnabled = (event: Event) => {
-    const el = (event.target as HTMLInputElement)
-    setGlobalSettingValueByKey('enablePetals', !!el.checked)
-    showPetalsSettings = $globalStorage.enablePetals
-    hasModels = hasActiveModels()
+  return `${randomVerb}_${randomNoun}_${deviceIdentifier}`;
 }
 
+
+
+  // Reaktive Variablen
+  $: apiKey = $apiKeyStorage;
+  let showPetalsSettings = $globalStorage.enablePetals;
+  let pedalsEndpoint = $globalStorage.pedalsEndpoint;
+  let hasModels = hasActiveModels();
+
+  onMount(() => {
+    if (!$globalStorage.userId) {
+      $globalStorage.userId = generateUserId();
+    }
+
+    
+    if (!$started) {
+      $started = true;
+      if (hasActiveModels() && getChat($lastChatId)) {
+        const chatId = $lastChatId;
+        $lastChatId = 0;
+        replace(`/chat/${chatId}`);
+      }
+    }
+    $lastChatId = 0;
+  });
+
+  afterUpdate(() => {
+    hasModels = hasActiveModels();
+    pedalsEndpoint = $globalStorage.pedalsEndpoint;
+    $checkStateChange++;
+  });
+
+
+
+
+  const setPetalsEnabled = (event: Event) => {
+    const el = (event.target as HTMLInputElement);
+    setGlobalSettingValueByKey('enablePetals', !!el.checked);
+    showPetalsSettings = $globalStorage.enablePetals;
+    hasModels = hasActiveModels();
+  };
 </script>
 
+
 <section class="section">
-  <article class="message">
+  <!--article class="message">
     <div class="message-body">
     <p class="mb-4">
       <strong><a href="https://github.com/Niek/chatgpt-web" target="_blank">ChatGPT-web</a></strong>
@@ -57,7 +87,7 @@ const setPetalsEnabled = (event: Event) => {
       As an alternative to OpenAI, you can also use Petals swarm as a free API option for open chat models like Llama 2. 
     </p>
     </div>
-  </article>
+  </article-->
   <article class="message" class:is-danger={!hasModels} class:is-warning={!apiKey} class:is-info={apiKey}>
     <div class="message-body">
       Set your OpenAI API key below:
@@ -101,7 +131,7 @@ const setPetalsEnabled = (event: Event) => {
   </article>
 
   
-  <article class="message" class:is-danger={!hasModels} class:is-warning={!showPetalsSettings} class:is-info={showPetalsSettings}>
+  <article class="message" style="display:none" class:is-danger={!hasModels} class:is-warning={!showPetalsSettings} class:is-info={showPetalsSettings}>
     <div class="message-body">
       <label class="label" for="enablePetals">
         <input 

@@ -14,7 +14,7 @@ export { classes as class }
 <div class="lower-mask2" class:strong-mask={strongMask} />
 <div class="section-footer {classes}" class:pin-footer={pin}>
   <slot />
-  <div class="content has-text-centered credit-footer">
+  <!--div class="content has-text-centered credit-footer">
     <p>
       <strong>ChatGPT-web</strong>
       <span class="author">by
@@ -23,5 +23,5 @@ export { classes as class }
       <a target="_blank" class="ml-4" href="https://github.com/Niek/chatgpt-web"><span style="position:absolute" class="icon default-text"><Fa size="2x" icon="{faGithub}"/></span></a>
       <span style="display:inline-block;width:30px;height:20px;"></span>
     </p>
-  </div>
+  </div-->
 </div>

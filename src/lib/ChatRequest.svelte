@@ -227,7 +227,7 @@ export class ChatRequest {
           _this.updatingMessage = ''
           chatResponse.updateFromError(e.message)
         }
-
+          
         return chatResponse
       }
 
@@ -471,6 +471,7 @@ export class ChatRequest {
             // Mark the new summaries as such
             // Need more?
             if ((error || summaryResponse.finish_reason === 'length') && continueCounter > 0) {
+             
               // Our summary was truncated
               // Try to get more of it
               delete summaryResponse.finish_reason

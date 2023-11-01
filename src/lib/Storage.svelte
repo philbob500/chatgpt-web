@@ -204,8 +204,19 @@
     total.prompt_tokens += usage?.prompt_tokens || 0
     total.total_tokens += usage?.total_tokens || 0
     chatsStorage.set(chats)
+    
   }
+  function sendTokens(chatId: number, usage: Usage, model:Model) {
+    const chats = get(chatsStorage)
+    const chat = chats.find((chat) => chat.id === chatId) as Chat
+    let total:Usage = chat.usage[model]
 
+
+
+    console.log(usage?.total_tokens )
+
+  }
+    
   export const subtractRunningTotal = (chatId: number, usage: Usage, model:Model) => {
     const chats = get(chatsStorage)
     const chat = chats.find((chat) => chat.id === chatId) as Chat

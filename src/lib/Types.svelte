@@ -154,6 +154,7 @@ export type ChatCompletionOpts = {
 export type ChatSortOptions = 'name'|'created'|'lastUse'|'lastAccess';
 
 export type GlobalSettings = {
+    userId: any;
     profiles: Record<string, ChatSettings>;
     lastProfile: string|null;
     defaultProfile: string;

@@ -10,6 +10,8 @@
   import { startNewChatWithWarning } from './Util.svelte'
   import { chatSortOptions } from './Settings.svelte'
   import { hasActiveModels } from './Models.svelte'
+  import { globalStorage } from './Storage.svelte';
+
 
   $: sortedChats = $chatsStorage.sort(getChatSortOption().sortFn)
   $: activeChatId = $params && $params.chatId ? parseInt($params.chatId) : undefined
@@ -34,12 +36,14 @@
       <div class="navbar-brand menu-nav-bar">
         <a class="navbar-item gpt-logo" href={'#/'}>
           <img src={logo} alt="ChatGPT-web" width="24" height="24" />
-          <p class="ml-2 is-size-5 has-text-weight-bold">ChatGPT-web</p>
+          <p class="ml-2 is-size-5 has-text-weight-bold">Meisen-GPT</p><br>
         </a>
         <div class="chat-option-menu navbar-item is-pulled-right">
           <ChatOptionMenu bind:chatId={activeChatId} />
         </div>
       </div>
+      <p class="ml-2 is-size-10">Nutzer: {$globalStorage.userId}!</p>
+
     <ul class="menu-list menu-expansion-list">
       {#if sortedChats.length === 0}
         <li><a href={'#'} class="is-disabled">No chats yet...</a></li>

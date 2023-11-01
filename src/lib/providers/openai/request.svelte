@@ -39,6 +39,7 @@ export const chatRequest = async (
         chatResponse.onFinish(() => {
           // chatRequest.updating = false
           // chatRequest.updatingMessage = ''
+         
         })
         fetchEventSource(getEndpoint(model), {
           ...fetchOptions,

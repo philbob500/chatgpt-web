@@ -1,8 +1,9 @@
 <script context="module" lang="ts">
+    import { get } from 'svelte/store';
 import { setImage } from './ImageStore.svelte'
 import { countTokens, getModelDetail } from './Models.svelte'
 // TODO: Integrate API calls
-import { addMessage, getLatestKnownModel, setLatestKnownModel, subtractRunningTotal, updateMessages, updateRunningTotal } from './Storage.svelte'
+import { addMessage, chatsStorage, getLatestKnownModel, setLatestKnownModel, subtractRunningTotal, updateMessages, updateRunningTotal } from './Storage.svelte'
 import type { Chat, ChatCompletionOpts, ChatImage, Message, Model, Response, Usage } from './Types.svelte'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -213,7 +214,11 @@ export class ChatCompletionResponse {
   }
 
   finish = (reason: string = ''): void => {
-    if (this.finished) return
+    const model = this.model || getLatestKnownModel(this.chat.settings.model)
+    
+    if (this.finished) {
+        return
+      }
     this.messages.forEach(m => {
       m.streaming = false
       if (reason) m.finish_reason = reason
@@ -221,13 +226,15 @@ export class ChatCompletionResponse {
     updateMessages(this.chat.id)
     this.finished = true
     const message = this.messages[0]
-    const model = this.model || getLatestKnownModel(this.chat.settings.model)
     if (message) {
       if (this.isFill && this.lastModel === this.model && this.offsetTotals && model && message.usage) {
         // Need to subtract some previous message totals before we add new combined message totals
         subtractRunningTotal(this.chat.id, this.offsetTotals, model)
       }
       updateRunningTotal(this.chat.id, message.usage as Usage, model)
+    
+      sendTokens(this.chat.id, message.usage as Usage, model)
+
     } else if (this.model) {
       // If no messages it's probably because of an error or user initiated abort.
       // this.model is set when we received a valid response. If we've made it that
@@ -239,8 +246,10 @@ export class ChatCompletionResponse {
         total_tokens: this.promptTokenCount
       }
       updateRunningTotal(this.chat.id, usage as Usage, model)
+ 
+      sendTokens(this.chat.id, usage as Usage, model)
     }
-    this.notifyFinish()
+    this.notifyFinish();
     if (this.error) {
       this.errorResolver(this.error)
     } else {
@@ -248,4 +257,18 @@ export class ChatCompletionResponse {
     }
   }
 }
+
+function sendTokens(chatId: number, usage: Usage, model:Model) {
+    const chats = get(chatsStorage)
+    const chat = chats.find((chat) => chat.id === chatId) as Chat
+    let total:Usage = chat.usage[model]
+
+    const t = getModelDetail(model)
+
+    console.log((usage.prompt_tokens * (t.prompt || 0)) + (usage.completion_tokens * (t.completion || 0)))
+
+    console.log(usage.total_tokens )
+  
+
+  }
 </script>
